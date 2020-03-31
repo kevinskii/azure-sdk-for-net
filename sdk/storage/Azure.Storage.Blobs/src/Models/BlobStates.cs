@@ -28,7 +28,7 @@ namespace Azure.Storage.Blobs.Models
         /// <summary>
         /// Flag specifying that blobs for which blocks have
         /// been uploaded, but which have not been committed using
-        /// <see cref="Specialized.BlockBlobClient.CommitBlockListAsync"/> should be
+        /// <see cref="Specialized.BlockBlobClient.CommitBlockListAsync(System.Collections.Generic.IEnumerable{BlockCommitInfo}, BlobHttpHeaders, System.Collections.Generic.IDictionary{string, string}, BlobRequestConditions, AccessTier?, System.Threading.CancellationToken)"/> should be
         /// included.
         /// </summary>
         Uncommitted = 2,

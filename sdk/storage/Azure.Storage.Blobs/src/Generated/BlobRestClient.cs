@@ -11620,7 +11620,7 @@ namespace Azure.Storage.Blobs
                 Azure.Core.Pipeline.ClientDiagnostics clientDiagnostics,
                 Azure.Core.Pipeline.HttpPipeline pipeline,
                 System.Uri resourceUri,
-                Azure.Storage.Blobs.Models.BlockLookupList blocks,
+                System.Collections.Generic.IEnumerable<Azure.Storage.Blobs.Models.BlockCommitInfo> blocks,
                 string version,
                 int? timeout = default,
                 string blobCacheControl = default,
@@ -11738,7 +11738,7 @@ namespace Azure.Storage.Blobs
             internal static Azure.Core.HttpMessage CommitBlockListAsync_CreateMessage(
                 Azure.Core.Pipeline.HttpPipeline pipeline,
                 System.Uri resourceUri,
-                Azure.Storage.Blobs.Models.BlockLookupList blocks,
+                System.Collections.Generic.IEnumerable<Azure.Storage.Blobs.Models.BlockCommitInfo> blocks,
                 string version,
                 int? timeout = default,
                 string blobCacheControl = default,
@@ -11815,7 +11815,24 @@ namespace Azure.Storage.Blobs
                 if (requestId != null) { _request.Headers.SetValue("x-ms-client-request-id", requestId); }
 
                 // Create the body
-                System.Xml.Linq.XElement _body = Azure.Storage.Blobs.Models.BlockLookupList.ToXml(blocks, "BlockList", "");
+                // Temp: This should be moved into an external method so we aren't modifying a generated file.
+                System.Xml.Linq.XElement _body = new System.Xml.Linq.XElement(System.Xml.Linq.XName.Get("BlockList", ""));
+                foreach (var block in blocks)
+                {
+                    switch (block.CommitType)
+                    {
+                        case Models.BlockCommitType.Committed:
+                            _body.Add(new System.Xml.Linq.XElement(System.Xml.Linq.XName.Get("Committed", ""), block.Base64ID));
+                            break;
+                        case Models.BlockCommitType.Uncommitted:
+                            _body.Add(new System.Xml.Linq.XElement(System.Xml.Linq.XName.Get("Uncommitted", ""), block.Base64ID));
+                            break;
+                        case Models.BlockCommitType.Latest:
+                            _body.Add(new System.Xml.Linq.XElement(System.Xml.Linq.XName.Get("Latest", ""), block.Base64ID));
+                            break;
+                    }
+                }
+
                 string _text = _body.ToString(System.Xml.Linq.SaveOptions.DisableFormatting);
                 _request.Headers.SetValue("Content-Type", "application/xml");
                 _request.Headers.SetValue("Content-Length", _text.Length.ToString(System.Globalization.CultureInfo.InvariantCulture));

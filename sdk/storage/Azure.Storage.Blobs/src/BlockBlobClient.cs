@@ -328,7 +328,10 @@ namespace Azure.Storage.Blobs.Specialized
         /// the content of the existing blob is overwritten with the content
         /// of the new blob.  To perform a partial update of the content of a
         /// block blob, use the <see cref="StageBlock"/> and
-        /// <see cref="CommitBlockList" /> operations.
+        /// <see cref="CommitBlockList(IEnumerable{string}, BlobHttpHeaders, Metadata, BlobRequestConditions, AccessTier?, CancellationToken)" />
+        /// or
+        /// <see cref="CommitBlockList(IEnumerable{BlockCommitInfo}, BlobHttpHeaders, Metadata, BlobRequestConditions, AccessTier?, CancellationToken)"/>
+        /// operations.
         ///
         /// For more information, see <see href="https://docs.microsoft.com/rest/api/storageservices/put-blob" />.
         /// </summary>
@@ -399,7 +402,8 @@ namespace Azure.Storage.Blobs.Specialized
         /// the content of the existing blob is overwritten with the content
         /// of the new blob.  To perform a partial update of the content of a
         /// block blob, use the <see cref="StageBlockAsync"/> and
-        /// <see cref="CommitBlockListAsync" /> operations.
+        /// <see cref="CommitBlockListAsync(IEnumerable{BlockCommitInfo}, BlobHttpHeaders, Metadata, BlobRequestConditions, AccessTier?, CancellationToken)" />
+        /// and <see cref="CommitBlockListAsync(IEnumerable{string}, BlobHttpHeaders, Metadata, BlobRequestConditions, AccessTier?, CancellationToken)"/> operations.
         ///
         /// For more information, see <see href="https://docs.microsoft.com/rest/api/storageservices/put-blob" />.
         /// </summary>
@@ -470,7 +474,8 @@ namespace Azure.Storage.Blobs.Specialized
         /// the content of the existing blob is overwritten with the content
         /// of the new blob.  To perform a partial update of the content of a
         /// block blob, use the <see cref="StageBlockAsync"/> and
-        /// <see cref="CommitBlockListAsync" /> operations.
+        /// <see cref="CommitBlockListAsync(IEnumerable{BlockCommitInfo}, BlobHttpHeaders, Metadata, BlobRequestConditions, AccessTier?, CancellationToken)" />
+        /// and <see cref="CommitBlockListAsync(IEnumerable{string}, BlobHttpHeaders, Metadata, BlobRequestConditions, AccessTier?, CancellationToken)"/> perations.
         ///
         /// For more information, see <see href="https://docs.microsoft.com/rest/api/storageservices/put-blob" />.
         /// </summary>
@@ -582,7 +587,8 @@ namespace Azure.Storage.Blobs.Specialized
         /// <summary>
         /// The <see cref="StageBlock"/> operation creates a new block as
         /// part of a block blob's "staging area" to be eventually committed
-        /// via the <see cref="CommitBlockList"/> operation.
+        /// via the <see cref="CommitBlockList(IEnumerable{BlockCommitInfo}, BlobHttpHeaders, Metadata, BlobRequestConditions, AccessTier?, CancellationToken)"/>
+        /// or <see cref="CommitBlockList(IEnumerable{string}, BlobHttpHeaders, Metadata, BlobRequestConditions, AccessTier?, CancellationToken)"/> operation.
         ///
         /// For more information, see <see href="https://docs.microsoft.com/en-us/rest/api/storageservices/put-block" />.
         /// </summary>
@@ -647,7 +653,8 @@ namespace Azure.Storage.Blobs.Specialized
         /// <summary>
         /// The <see cref="StageBlockAsync"/> operation creates a new block as
         /// part of a block blob's "staging area" to be eventually committed
-        /// via the <see cref="CommitBlockListAsync"/> operation.
+        /// via the <see cref="CommitBlockListAsync(IEnumerable{BlockCommitInfo}, BlobHttpHeaders, Metadata, BlobRequestConditions, AccessTier?, CancellationToken)"/>
+        /// or <see cref="CommitBlockListAsync(IEnumerable{string}, BlobHttpHeaders, Metadata, BlobRequestConditions, AccessTier?, CancellationToken)"/> operation.
         ///
         /// For more information, see <see href="https://docs.microsoft.com/en-us/rest/api/storageservices/put-block" />.
         /// </summary>
@@ -712,7 +719,8 @@ namespace Azure.Storage.Blobs.Specialized
         /// <summary>
         /// The <see cref="StageBlockInternal"/> operation creates a new block
         /// as part of a block blob's "staging area" to be eventually committed
-        /// via the <see cref="CommitBlockListAsync"/> operation.
+        /// via the <see cref="CommitBlockListAsync(IEnumerable{BlockCommitInfo}, BlobHttpHeaders, Metadata, BlobRequestConditions, AccessTier?, CancellationToken)"/>
+        /// or <see cref="CommitBlockListAsync(IEnumerable{string}, BlobHttpHeaders, Metadata, BlobRequestConditions, AccessTier?, CancellationToken)"/> operation.
         ///
         /// For more information, see <see href="https://docs.microsoft.com/en-us/rest/api/storageservices/put-block" />.
         /// </summary>
@@ -1087,17 +1095,11 @@ namespace Azure.Storage.Blobs.Specialized
 
         #region CommitBlockList
         /// <summary>
-        /// The <see cref="CommitBlockList"/> operation writes a blob by
-        /// specifying the list of block IDs that make up the blob.  In order
+        /// The <see cref="CommitBlockList(IEnumerable{string}, BlobHttpHeaders, Metadata, BlobRequestConditions, AccessTier?, CancellationToken)"/> operation writes a blob by
+        /// specifying the list of uncommitted block IDs that make up the blob.  In order
         /// to be written as part of a blob, a block must have been
         /// successfully written to the server in a prior <see cref="StageBlock"/>
-        /// operation.  You can call <see cref="CommitBlockList"/> to
-        /// update a blob by uploading only those blocks that have changed,
-        /// then committing the new and existing blocks together.  You can do
-        /// this by specifying whether to commit a block from the committed
-        /// block list or from the uncommitted block list, or to commit the
-        /// most recently uploaded version of the block, whichever list it
-        /// may belong to.  Any blocks not specified in the block list and
+        /// operation. Any blocks not specified in the block list and
         /// permanently deleted.
         ///
         /// For more information, see  <see href="https://docs.microsoft.com/rest/api/storageservices/put-block-list"/>.
@@ -1153,12 +1155,13 @@ namespace Azure.Storage.Blobs.Specialized
                 cancellationToken)
                 .EnsureCompleted();
 
+
         /// <summary>
-        /// The <see cref="CommitBlockListAsync"/> operation writes a blob by
-        /// specifying the list of block IDs that make up the blob.  In order
+        /// The <see cref="CommitBlockList(IEnumerable{BlockCommitInfo}, BlobHttpHeaders, Metadata, BlobRequestConditions, AccessTier?, CancellationToken)"/> operation writes a blob by
+        /// specifying the list of blocks that make up the blob.  In order
         /// to be written as part of a blob, a block must have been
-        /// successfully written to the server in a prior <see cref="StageBlockAsync"/>
-        /// operation.  You can call <see cref="CommitBlockListAsync"/> to
+        /// successfully written to the server in a prior <see cref="StageBlock"/>
+        /// operation.  You can call <see cref="CommitBlockList(IEnumerable{BlockCommitInfo}, BlobHttpHeaders, Metadata, BlobRequestConditions, AccessTier?, CancellationToken)"/> to
         /// update a blob by uploading only those blocks that have changed,
         /// then committing the new and existing blocks together.  You can do
         /// this by specifying whether to commit a block from the committed
@@ -1169,8 +1172,65 @@ namespace Azure.Storage.Blobs.Specialized
         ///
         /// For more information, see  <see href="https://docs.microsoft.com/rest/api/storageservices/put-block-list"/>.
         /// </summary>
+        /// <param name="blocks">
+        /// Specify the blocks that should be committed. <see cref="Azure.Storage.Blobs.Models.BlockCommitInfo"/>
+        /// </param>
+        /// <param name="httpHeaders">
+        /// Optional standard HTTP header properties that can be set for the
+        /// block blob.
+        /// </param>
+        /// <param name="metadata">
+        /// Optional custom metadata to set for this block blob.
+        /// </param>
+        /// <param name="conditions">
+        /// Optional <see cref="BlockBlobClient"/> to add
+        /// conditions on committing this block list.
+        /// </param>
+        /// <param name="accessTier">
+        /// Optional <see cref="AccessTier"/>
+        /// Indicates the tier to be set on the blob.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// Optional <see cref="CancellationToken"/> to propagate
+        /// notifications that the operation should be cancelled.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Response{BlobAppendInfo}"/> describing the
+        /// state of the updated block blob.
+        /// </returns>
+        /// <remarks>
+        /// A <see cref="RequestFailedException"/> will be thrown if
+        /// a failure occurs.
+        /// </remarks>
+        public virtual Response<BlobContentInfo> CommitBlockList(
+            IEnumerable<BlockCommitInfo> blocks,
+            BlobHttpHeaders httpHeaders = default,
+            Metadata metadata = default,
+            BlobRequestConditions conditions = default,
+            AccessTier? accessTier = default,
+            CancellationToken cancellationToken = default) =>
+            CommitBlockListInternal(
+                blocks,
+                httpHeaders,
+                metadata,
+                conditions,
+                accessTier,
+                false, // async
+                cancellationToken)
+                .EnsureCompleted();
+
+         /// <summary>
+        /// The <see cref="CommitBlockListAsync(IEnumerable{string}, BlobHttpHeaders, Metadata, BlobRequestConditions, AccessTier?, CancellationToken)"/> operation writes a blob by
+        /// specifying the list of uncommitted block IDs that make up the blob. In order
+        /// to be written as part of a blob, a block must have been
+        /// successfully written to the server in a prior <see cref="StageBlockAsync"/>
+        /// operation. Any blocks not specified in the block list and
+        /// permanently deleted.
+        ///
+        /// For more information, see  <see href="https://docs.microsoft.com/rest/api/storageservices/put-block-list"/>.
+        /// </summary>
         /// <param name="base64BlockIds">
-        /// Specify the Uncommitted Base64 encoded block IDs to indicate that
+        /// Specify the uncommitted Base64 encoded block IDs to indicate that
         /// the blob service should search only the uncommitted block list for
         /// the named blocks.  If the block is not found in the uncommitted
         /// block list, it will not be written as part of the blob, and a
@@ -1221,11 +1281,11 @@ namespace Azure.Storage.Blobs.Specialized
                 .ConfigureAwait(false);
 
         /// <summary>
-        /// The <see cref="CommitBlockListInternal"/> operation writes a blob by
+        /// The <see cref="CommitBlockListAsync(IEnumerable{BlockCommitInfo}, BlobHttpHeaders, Metadata, BlobRequestConditions, AccessTier?, CancellationToken)"/> operation writes a blob by
         /// specifying the list of block IDs that make up the blob.  In order
         /// to be written as part of a blob, a block must have been
         /// successfully written to the server in a prior <see cref="StageBlockAsync"/>
-        /// operation.  You can call <see cref="CommitBlockListAsync"/> to
+        /// operation.  You can call <see cref="CommitBlockListAsync(IEnumerable{BlockCommitInfo}, BlobHttpHeaders, Metadata, BlobRequestConditions, AccessTier?, CancellationToken)"/> to
         /// update a blob by uploading only those blocks that have changed,
         /// then committing the new and existing blocks together.  You can do
         /// this by specifying whether to commit a block from the committed
@@ -1236,12 +1296,70 @@ namespace Azure.Storage.Blobs.Specialized
         ///
         /// For more information, see  <see href="https://docs.microsoft.com/rest/api/storageservices/put-block-list"/>.
         /// </summary>
-        /// <param name="base64BlockIds">
-        /// Specify the Uncommitted Base64 encoded block IDs to indicate that
-        /// the blob service should search only the uncommitted block list for
-        /// the named blocks.  If the block is not found in the uncommitted
-        /// block list, it will not be written as part of the blob, and a
-        /// <see cref="RequestFailedException"/> will be thrown.
+        /// <param name="blocks">
+        /// Specify the blocks that should be committed. <see cref="Azure.Storage.Blobs.Models.BlockCommitInfo"/>
+        /// </param>
+        /// <param name="httpHeaders">
+        /// Optional standard HTTP header properties that can be set for the
+        /// block blob.
+        /// </param>
+        /// <param name="metadata">
+        /// Optional custom metadata to set for this block blob.
+        /// </param>
+        /// <param name="conditions">
+        /// Optional <see cref="BlockBlobClient"/> to add
+        /// conditions on committing this block list.
+        /// </param>
+        /// <param name="accessTier">
+        /// Optional <see cref="AccessTier"/>
+        /// Indicates the tier to be set on the blob.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// Optional <see cref="CancellationToken"/> to propagate
+        /// notifications that the operation should be cancelled.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Response{BlobAppendInfo}"/> describing the
+        /// state of the updated block blob.
+        /// </returns>
+        /// <remarks>
+        /// A <see cref="RequestFailedException"/> will be thrown if
+        /// a failure occurs.
+        /// </remarks>
+        public virtual async Task<Response<BlobContentInfo>> CommitBlockListAsync(
+            IEnumerable<BlockCommitInfo> blocks,
+            BlobHttpHeaders httpHeaders = default,
+            Metadata metadata = default,
+            BlobRequestConditions conditions = default,
+            AccessTier? accessTier = default,
+            CancellationToken cancellationToken = default) =>
+            await CommitBlockListInternal(
+                blocks,
+                httpHeaders,
+                metadata,
+                conditions,
+                accessTier,
+                true, // async
+                cancellationToken).ConfigureAwait(false);
+
+        /// <summary>
+        /// The <see cref="CommitBlockListInternal(IEnumerable{BlockCommitInfo}, BlobHttpHeaders, Metadata, BlobRequestConditions, AccessTier?, bool, CancellationToken)"/> operation writes a blob by
+        /// specifying the list of blocks that make up the blob.  In order
+        /// to be written as part of a blob, a block must have been
+        /// successfully written to the server in a prior <see cref="StageBlockAsync"/>
+        /// operation.  You can call <see cref="CommitBlockListAsync(IEnumerable{BlockCommitInfo}, BlobHttpHeaders, Metadata, BlobRequestConditions, AccessTier?, CancellationToken)"/> to
+        /// update a blob by uploading only those blocks that have changed,
+        /// then committing the new and existing blocks together.  You can do
+        /// this by specifying whether to commit a block from the committed
+        /// block list or from the uncommitted block list, or to commit the
+        /// most recently uploaded version of the block, whichever list it
+        /// may belong to.  Any blocks not specified in the block list and
+        /// permanently deleted.
+        ///
+        /// For more information, see  <see href="https://docs.microsoft.com/rest/api/storageservices/put-block-list"/>.
+        /// </summary>
+        /// <param name="blocks">
+        /// A list of blocks to be committed. <see cref="Azure.Storage.Blobs.Models.BlockCommitInfo"/>
         /// </param>
         /// <param name="blobHttpHeaders">
         /// Optional standard HTTP header properties that can be set for the
@@ -1274,7 +1392,7 @@ namespace Azure.Storage.Blobs.Specialized
         /// a failure occurs.
         /// </remarks>
         internal async Task<Response<BlobContentInfo>> CommitBlockListInternal(
-            IEnumerable<string> base64BlockIds,
+            IEnumerable<BlockCommitInfo> blocks,
             BlobHttpHeaders blobHttpHeaders,
             Metadata metadata,
             BlobRequestConditions conditions,
@@ -1284,6 +1402,7 @@ namespace Azure.Storage.Blobs.Specialized
         {
             using (Pipeline.BeginLoggingScope(nameof(BlockBlobClient)))
             {
+                IEnumerable<string> base64BlockIds = blocks.Select(block => block.Base64ID);
                 Pipeline.LogMethodEnter(
                     nameof(BlockBlobClient),
                     message:
@@ -1293,7 +1412,6 @@ namespace Azure.Storage.Blobs.Specialized
                     $"{nameof(conditions)}: {conditions}");
                 try
                 {
-                    var blocks = new BlockLookupList() { Uncommitted = base64BlockIds.ToList() };
                     return await BlobRestClient.BlockBlob.CommitBlockListAsync(
                         ClientDiagnostics,
                         Pipeline,
@@ -1333,6 +1451,65 @@ namespace Azure.Storage.Blobs.Specialized
                 }
             }
         }
+
+
+        /// <summary>
+        /// The <see cref="CommitBlockListInternal(IEnumerable{string}, BlobHttpHeaders, Metadata, BlobRequestConditions, AccessTier?, bool, CancellationToken)"/> operation writes a blob by
+        /// specifying the list of uncommitted block IDs that make up the blob.  In order
+        /// to be written as part of a blob, a block must have been
+        /// successfully written to the server in a prior <see cref="StageBlockAsync"/>
+        /// operation. Any blocks not specified in the block list and
+        /// permanently deleted.
+        ///
+        /// For more information, see  <see href="https://docs.microsoft.com/rest/api/storageservices/put-block-list"/>.
+        /// </summary>
+        /// <param name="base64BlockIDs">
+        /// A list of uncommitted base 64 block IDs to be committed.
+        /// </param>
+        /// <param name="blobHttpHeaders">
+        /// Optional standard HTTP header properties that can be set for the
+        /// block blob.
+        /// </param>
+        /// <param name="metadata">
+        /// Optional custom metadata to set for this block blob.
+        /// </param>
+        /// <param name="conditions">
+        /// Optional <see cref="BlockBlobClient"/> to add
+        /// conditions on committing this block list.
+        /// </param>
+        /// <param name="accessTier">
+        /// Optional <see cref="AccessTier"/>
+        /// Indicates the tier to be set on the blob.
+        /// </param>
+        /// <param name="async">
+        /// Whether to invoke the operation asynchronously.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// Optional <see cref="CancellationToken"/> to propagate
+        /// notifications that the operation should be cancelled.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Response{BlobAppendInfo}"/> describing the
+        /// state of the updated block blob.
+        /// </returns>
+        /// <remarks>
+        /// A <see cref="RequestFailedException"/> will be thrown if
+        /// a failure occurs.
+        /// </remarks>
+        internal Task<Response<BlobContentInfo>> CommitBlockListInternal(
+            IEnumerable<string> base64BlockIDs,
+            BlobHttpHeaders blobHttpHeaders,
+            Metadata metadata,
+            BlobRequestConditions conditions,
+            AccessTier? accessTier,
+            bool async,
+            CancellationToken cancellationToken)
+        {
+            // In keeping with existing behavior, assume all blocks are "Uncommitted"
+            IEnumerable<BlockCommitInfo> blocks =
+                base64BlockIDs.Select(id => new BlockCommitInfo { Base64ID = id, CommitType = BlockCommitType.Uncommitted });
+            return CommitBlockListInternal(blocks, blobHttpHeaders, metadata, conditions, accessTier, async, cancellationToken);
+        }
         #endregion CommitBlockList
 
         #region GetBlockList
@@ -1341,8 +1518,9 @@ namespace Azure.Storage.Blobs.Specialized
         /// the list of blocks that have been uploaded as part of a block blob.
         /// There are two block lists maintained for a blob.  The Committed
         /// Block list has blocks that have been successfully committed to a
-        /// given blob with <see cref="CommitBlockList"/>.  The
-        /// Uncommitted Block list has blocks that have been uploaded for a
+        /// given blob with <see cref="CommitBlockListInternal(IEnumerable{string}, BlobHttpHeaders, Metadata, BlobRequestConditions, AccessTier?, bool, CancellationToken)"/>
+        /// or <see cref="CommitBlockListInternal(IEnumerable{BlockCommitInfo}, BlobHttpHeaders, Metadata, BlobRequestConditions, AccessTier?, bool, CancellationToken)"/>.
+        /// The uncommitted Block list has blocks that have been uploaded for a
         /// blob using <see cref="StageBlock"/>, but that have not yet
         /// been committed.  These blocks are stored in Azure in association
         /// with a blob, but do not yet form part of the blob.
@@ -1391,8 +1569,9 @@ namespace Azure.Storage.Blobs.Specialized
         /// the list of blocks that have been uploaded as part of a block blob.
         /// There are two block lists maintained for a blob.  The Committed
         /// Block list has blocks that have been successfully committed to a
-        /// given blob with <see cref="CommitBlockListAsync"/>.  The
-        /// Uncommitted Block list has blocks that have been uploaded for a
+        /// given blob with <see cref="CommitBlockListAsync(IEnumerable{BlockCommitInfo}, BlobHttpHeaders, Metadata, BlobRequestConditions, AccessTier?, CancellationToken)"/>
+        /// or <see cref="CommitBlockListAsync(IEnumerable{string}, BlobHttpHeaders, Metadata, BlobRequestConditions, AccessTier?, CancellationToken)"/>.
+        /// The uncommitted Block list has blocks that have been uploaded for a
         /// blob using <see cref="StageBlockAsync"/>, but that have not yet
         /// been committed.  These blocks are stored in Azure in association
         /// with a blob, but do not yet form part of the blob.
@@ -1441,8 +1620,9 @@ namespace Azure.Storage.Blobs.Specialized
         /// the list of blocks that have been uploaded as part of a block blob.
         /// There are two block lists maintained for a blob.  The Committed
         /// Block list has blocks that have been successfully committed to a
-        /// given blob with <see cref="CommitBlockListAsync"/>.  The
-        /// Uncommitted Block list has blocks that have been uploaded for a
+        /// given blob with <see cref="CommitBlockListAsync(IEnumerable{BlockCommitInfo}, BlobHttpHeaders, Metadata, BlobRequestConditions, AccessTier?, CancellationToken)"/>
+        /// or <see cref="CommitBlockListAsync(IEnumerable{string}, BlobHttpHeaders, Metadata, BlobRequestConditions, AccessTier?, CancellationToken)"/>.
+        /// The uncommitted Block list has blocks that have been uploaded for a
         /// blob using <see cref="StageBlockAsync"/>, but that have not yet
         /// been committed.  These blocks are stored in Azure in association
         /// with a blob, but do not yet form part of the blob.
